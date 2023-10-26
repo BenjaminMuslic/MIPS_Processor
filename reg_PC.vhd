@@ -1,0 +1,58 @@
+LIBRARY IEEE;
+USE IEEE.std_logic_1164.ALL;
+
+ENTITY reg_PC IS
+    GENERIC (N : INTEGER := 32);
+    PORT (
+        i_CLK : IN STD_LOGIC;
+        i_RST : IN STD_LOGIC;
+        i_WE : IN STD_LOGIC;
+        i_D : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+        o_Q : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0));
+END reg_PC;
+ARCHITECTURE structural OF reg_PC IS
+
+    COMPONENT dffg IS
+        PORT (
+            i_CLK : IN STD_LOGIC; -- Clock input
+            i_RST : IN STD_LOGIC; -- Reset input
+            i_WE : IN STD_LOGIC; -- Write enable input
+            i_D : IN STD_LOGIC; -- Data value input
+            o_Q : OUT STD_LOGIC); -- Data value output
+    END COMPONENT;
+
+BEGIN
+    --First 21 registers
+    G_Start_reg : FOR i IN 0 TO 21 GENERATE
+        REG_N : dffg PORT MAP(
+            i_CLK => i_CLK,
+            i_RST => i_RST,
+            i_WE => i_WE,
+            i_D => i_D(i),
+            o_Q => o_Q(i));
+    END GENERATE G_Start_reg;
+
+    --Hardcode the MARS starting address for 22nd register
+
+    Reset_reg : dffg
+    PORT MAP(
+        i_CLK => i_CLK,
+        i_RST => '0',
+        i_WE => i_WE,
+        i_D => '1',
+        o_Q => o_Q(22));
+
+    --Create last couple all the way to 31
+    G_Final_reg : FOR i IN 23 TO 31 GENERATE
+        REG_N : dffg PORT MAP(
+            i_CLK => i_CLK,
+            i_RST => i_RST,
+            i_WE => i_WE,
+            i_D => i_D(i),
+            o_Q => o_Q(i));
+    END GENERATE G_Final_reg;
+
+
+
+
+END structural;
